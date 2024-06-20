@@ -1,0 +1,17 @@
+.withChipbar {
+  margin-top: 60px;
+}
+.Grid {
+  width: 100% !important;
+  height: 100vh !important;
+}
+.Grid > div {
+  width: 100% !important;
+  /* height: 120% !important; */
+  display: flex;
+  flex-wrap: wrap;
+}
+.Cell {
+  width: 33%;
+  padding: 10px;
+}

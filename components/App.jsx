@@ -14,6 +14,9 @@ import ChannelVideos from "./pages/channels/Videos";
 import ChannelPlaylists from "./pages/channels/Playlists";
 import ChannelAbout from "./pages/channels/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import QuranTranslations from "./pages/QuranTranslations";
+import LearnQuran from "./pages/LearnQuran";
+import LearnQuranVirtuoso from "./pages/LearnQuranVirtuoso";
 
 window
   .matchMedia("(prefers-color-scheme: dark)")
@@ -33,6 +36,17 @@ const App = () => {
           <Layout>
             <IonRouterOutlet id="main" style={{ position: "relative" }}>
               <Route exact path="/" render={() => <Home />} />
+              <Route
+                exact
+                path="/quran-translations"
+                render={() => <QuranTranslations />}
+              />
+              <Route exact path="/learn-quran" render={() => <LearnQuran />} />
+              <Route
+                exact
+                path="/learn-quran-virtuoso"
+                render={() => <LearnQuranVirtuoso />}
+              />
               <Route exact path="/watch/:id" component={Watch} />
               <Route exact path="/search" component={Search} />
               <Route exact path="/channels" component={Channels} />

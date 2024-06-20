@@ -19,70 +19,7 @@ import {
   next as nextIcon,
 } from "../../icons";
 
-const tags = [
-  {
-    title: "Explore",
-    icon: exploreOutline,
-    mobile: true,
-  },
-  {
-    title: "All",
-    active: true,
-  },
-  {
-    title: "JavaScript",
-  },
-  {
-    title: "User interface design",
-  },
-  {
-    title: "Flutter",
-  },
-  {
-    title: "React",
-  },
-  {
-    title: "Node",
-  },
-  {
-    title: "Python",
-  },
-  {
-    title: "PHP",
-  },
-  {
-    title: "Lectures",
-  },
-  {
-    title: "Laravel",
-  },
-  {
-    title: "Java",
-  },
-  {
-    title: "Bodyweight exercise",
-  },
-  {
-    title: "User interface design",
-  },
-  {
-    title: "Flutter",
-  },
-  {
-    title: "React",
-  },
-  {
-    title: "Node",
-  },
-  {
-    title: "Lectures",
-  },
-  {
-    title: "Laravel",
-  },
-];
-
-const ChipBar = () => {
+const ChipBar = ({ locales, activeId, subCatClickHandler }) => {
   const containerRef = useRef(null);
   const contentRef = useRef(null);
 
@@ -118,7 +55,7 @@ const ChipBar = () => {
   useEffect(() => {
     setContainerWidth(containerRef.current.offsetWidth);
     setContentWidth(contentRef.current.offsetWidth);
-  }, [tags]);
+  }, [locales]);
 
   useEffect(() => {
     containerRef.current.scrollLeft = scrollLeft;
@@ -128,18 +65,26 @@ const ChipBar = () => {
     <div className={styles.wrapper}>
       <div className={styles.content} ref={containerRef}>
         <ul className={styles.list} ref={contentRef}>
-          {tags.map((t, i) => (
+          <li
+            className={classNames(styles.item, activeId ? "" : styles.active)}
+            onClick={() => subCatClickHandler(null)}
+          >
+            <IonLabel className={styles.label}>All</IonLabel>
+          </li>
+          {locales.map((t, i) => (
             <li
               key={i}
               className={classNames(
                 styles.item,
-                t.mobile ? styles.mobile : t.active ? styles.active : ""
+                // t.mobile ? styles.mobile : t.active ? styles.active : ""
+                t.id == activeId ? styles.active : ""
               )}
+              onClick={() => subCatClickHandler(t.id)}
             >
-              {t.icon && (
+              {/* {t.icon && (
                 <IonIcon icon={t.icon} slot="start" className={styles.icon} />
-              )}
-              <IonLabel className={styles.label}>{t.title}</IonLabel>
+              )} */}
+              <IonLabel className={styles.label}>{t.attributes.name}</IonLabel>
             </li>
           ))}
         </ul>

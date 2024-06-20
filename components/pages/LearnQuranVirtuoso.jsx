@@ -8,22 +8,17 @@ import {
   getYoutubeVideoDetailsByUrl,
   getYoutubeVideoListByUrl,
 } from "../../lib/fetch";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import Layout from "../core/Layout";
 import VideoCard from "../cards/Video";
 import ChipBar from "../ui/ChipBar";
 import Loader from "../utils/Loader";
 import useOnScreen from "../../hooks/useOnScreen";
-import Previewer from "../utils/Previewer";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
+import { Virtuoso, VirtuosoGrid } from "react-virtuoso";
 
 const getUrl = (pagination) => {
-  // let pageToken = "";
-  // if (previousPageData !== null && previousPageData.nextPageToken !== null) {
-  //   pageToken = `&pageToken=${previousPageData.nextPageToken}`;
-  // }
-
   let page = pagination.page ? pagination.page : 1;
   if (Object.keys(pagination).length !== 0) {
     if (pagination.page < pagination.pageCount) {
@@ -32,25 +27,53 @@ const getUrl = (pagination) => {
   }
 
   console.log("page: " + page);
-  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${constants.DEFAULT_PAGE_LIMIT}&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Arabic&filters[dataContentType][$eq]=Quran Translation&filters[dataContentType][$eq]=Quran Learning&filters[status][$eq]=Approved`;
 
-  // return `${youtube.url}/playlistItems?key=${youtube.key}&part=snippet&playlistId=${playlistId}&maxResults=${constants.DEFAULT_PAGE_LIMIT}${pageToken}`;
+  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${constants.DEFAULT_PAGE_LIMIT}&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Learning&filters[status][$eq]=Approved`;
 };
 
-const Home = () => {
-  const isMini = UIStore.useState((s) => s.isMiniNav);
+const LearnQuranVirtuoso = () => {
+  const gridComponents = {
+    List: forwardRef(({ style, children, ...props }, ref) => (
+      <div
+        ref={ref}
+        {...props}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          ...style,
+        }}
+      >
+        {children}
+      </div>
+    )),
 
-  const ref = useRef();
-  const isVisible = useOnScreen(ref);
-  const [isLoadingMore, setIsloadingMore] = useState(true);
+    Item: ({ children, ...props }) => (
+      <div
+        {...props}
+        // style={{
+        //   padding: "0.5rem",
+        //   width: "25%",
+        //   display: "flex",
+        //   flex: "none",
+        //   alignContent: "stretch",
+        //   boxSizing: "border-box",
+        // }}
+      >
+        {children}
+      </div>
+    ),
+  };
+
+  const isMini = UIStore.useState((s) => s.isMiniNav);
 
   const [data, setData] = useState({
     pagination: {},
     videos: [],
   });
 
+  // fetch video on first load
   useEffect(() => {
-    const url = getUrl(data.pagination);
+    const url = getUrl({});
 
     const fetchData = async () => {
       const res = await getVideosDataByUrl(url);
@@ -58,21 +81,13 @@ const Home = () => {
         pagination: res.meta.pagination,
         videos: res.data,
       });
-      setIsloadingMore(false);
     };
 
     fetchData().catch(console.error);
   }, []);
-  console.log(data);
 
-  useEffect(() => {
-    if (
-      isVisible &&
-      !isLoadingMore &&
-      data.pagination.page < data.pagination.pageCount
-    ) {
-      setIsloadingMore(true);
-
+  const loadMore = () => {
+    if (data.pagination.page < data.pagination.pageCount) {
       const url = getUrl(data.pagination);
 
       const fetchData = async () => {
@@ -84,13 +99,11 @@ const Home = () => {
         };
 
         setData(newData);
-        setIsloadingMore(false);
       };
 
       fetchData().catch(console.error);
     }
-  }, [isVisible, isLoadingMore]);
-  console.log("isVisible: " + isVisible, isLoadingMore);
+  };
 
   const containerRef = useRef(null);
 
@@ -123,14 +136,13 @@ const Home = () => {
   return (
     <>
       <Meta
-        title=""
-        description="Quran.Tube Homepage"
+        title="Learn Quran"
+        description="Quran.Tube"
         url={server}
         image={`${server}/img/logo/default_share.png`}
         type="website"
       />
 
-      {/* <Previewer /> */}
       <PlayerModal
         open={modalOpen}
         closer={handleModalClose}
@@ -139,37 +151,52 @@ const Home = () => {
       />
 
       <div className={styles.wrapper}>
-        {/*<div*/}
-        {/*  className={classNames(*/}
-        {/*    styles.header,*/}
-        {/*    isMini ? styles.mini : "",*/}
-        {/*    "chipbar"*/}
-        {/*  )}*/}
-        {/*>*/}
-        {/*  <ChipBar />*/}
-        {/*</div>*/}
-
         <div className={styles.container}>
-          <div className={styles.content} ref={containerRef}>
-            {data.videos.map((video, index) => (
-              <div className={styles.item} key={index}>
+          {/* <div className={styles.content} ref={containerRef}> */}
+          <VirtuosoGrid
+            components={gridComponents}
+            style={{ width: "100%", height: "100vh" }}
+            totalCount={data.videos.length}
+            // useWindowScroll
+            data={data.videos}
+            endReached={loadMore}
+            increaseViewportBy={500}
+            overscan={8}
+            itemClassName={styles.item}
+            itemContent={(index, video) => {
+              return (
                 <VideoCard
                   handleClick={handleClick}
-                  attributes={video.attributes}
-                  // statistics={data.videoStats}
-                  // channelThumbnails={data.channels}
+                  attributes={data.videos[index].attributes}
                 />
-              </div>
-            ))}
+              );
+            }}
+          />
 
-            <div ref={ref} className={styles.loader}>
-              {isLoadingMore && <Loader />}
-            </div>
-          </div>
+          {/* <Virtuoso
+            style={{ width: "100%", height: "100vh" }}
+            // useWindowScroll
+            data={data.videos}
+            endReached={loadMore}
+            // increaseViewportBy={100}
+            overscan={10}
+            itemContent={(index, video) => {
+              return (
+                <div className={styles.item} key={index}>
+                  <VideoCard
+                    handleClick={handleClick}
+                    attributes={video.attributes}
+                  />
+                </div>
+              );
+            }}
+            components={{ Loader }}
+          /> */}
+          {/* </div> */}
         </div>
       </div>
     </>
   );
 };
 
-export default Home;
+export default LearnQuranVirtuoso;

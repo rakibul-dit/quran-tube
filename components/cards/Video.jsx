@@ -16,17 +16,7 @@ import {
   setPreviewVideo,
 } from "../../store";
 
-const VideoCard = ({
-  id,
-  image,
-  title,
-  publishedAt,
-  channelId,
-  channelTitle,
-  statistics,
-  channelThumbnails,
-  handleClick,
-}) => {
+const VideoCard = ({ attributes, handleClick }) => {
   const open = PopupStore.useState((s) => s.open);
   const reference = PopupStore.useState((s) => s.reference);
   const popupReference = useRef(null);
@@ -34,7 +24,7 @@ const VideoCard = ({
   const handlePopup = (e) => {
     e.stopPropagation();
     setPopupReference(popupReference.current);
-    setPopupVideoId(id);
+    setPopupVideoId(attributes.ytVideoId);
     setPopupOpen(true);
   };
 
@@ -91,13 +81,17 @@ const VideoCard = ({
       <div className={styles.content}>
         <div className={styles.inner}>
           <div className={styles.media}>
-            <div className={styles.thumb} onClick={() => handleClick(id)}>
+            <div
+              className={styles.thumb}
+              onClick={() => handleClick(attributes.ytVideoId)}
+            >
               <img
-                src={
-                  image
-                    ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
-                    : `${server}/img/youtube/youtube-default.jpg`
-                }
+                // src={
+                //   image
+                //     ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
+                //     : `${server}/img/youtube/youtube-default.jpg`
+                // }
+                src={`https://i.ytimg.com/vi/${attributes.ytVideoId}/mqdefault.jpg`}
                 alt=""
                 ref={previewRef}
                 // onMouseEnter={() => handlePreviewOnHover(true)}
@@ -106,16 +100,19 @@ const VideoCard = ({
             </div>
 
             <div className={styles.details}>
-              <div className={styles.avatar} onClick={() => handleClick(id)}>
+              {/* <div className={styles.avatar} onClick={() => handleClick(id)}>
                 <img
                   src={channelThumbnails ? channelThumbnails[channelId] : ""} //
                   alt=""
                 />
-              </div>
+              </div> */}
               <div className={styles.meta}>
                 <div className={styles.meta_top}>
-                  <div onClick={() => handleClick(id)} className={styles.title}>
-                    <h3>{title}</h3>
+                  <div
+                    onClick={() => handleClick(attributes.ytVideoId)}
+                    className={styles.title}
+                  >
+                    <h3>{attributes.title}</h3>
                   </div>
                   <div className={styles.popup_button} ref={popupReference}>
                     <IonIcon
@@ -128,12 +125,12 @@ const VideoCard = ({
                 </div>
 
                 <div className={styles.metadata}>
-                  <div className={styles.top}>{channelTitle}</div>
+                  {/* <div className={styles.top}>{channelTitle}</div> */}
                   <div className={styles.bottom}>
-                    <span>
+                    {/* <span>
                       {statistics ? format.count(statistics[id]) : ""} views
-                    </span>
-                    <span>{format.date(publishedAt)}</span>
+                    </span> */}
+                    <span>{format.date(attributes.contentPublishedAt)}</span>
                   </div>
                 </div>
               </div>

@@ -20,7 +20,9 @@ import {
   watchOutline,
   like,
   likeOutline,
-  settingsOutline, captivePortal, historyEdu,
+  settingsOutline,
+  captivePortal,
+  historyEdu,
 } from "../../icons";
 import MenuClickModal from "../pages/modal/MenuClickModal";
 
@@ -35,37 +37,47 @@ const pages1 = [
     title: "Quran Translations",
     icon: captivePortal,
     iconOutline: captivePortal,
-    url: "/history",
+    url: "/quran-translations",
   },
   {
     title: "Salah Recitations",
     icon: library,
     iconOutline: libraryOutline,
     url: "/subscriptions",
+    inProgress: true,
   },
   {
     title: "Learn Quran",
     icon: historyEdu,
     iconOutline: historyEdu,
-    url: "/explore",
+    url: "/learn-quran",
+  },
+  {
+    title: "Learn Quran Virtuoso",
+    icon: historyEdu,
+    iconOutline: historyEdu,
+    url: "/learn-quran-virtuoso",
   },
   {
     title: "Recitations in Makkah",
     icon: library,
     iconOutline: libraryOutline,
     url: "/subscriptions",
+    inProgress: true,
   },
   {
     title: "Recitations in Madinah",
     icon: library,
     iconOutline: libraryOutline,
     url: "/subscriptions",
+    inProgress: true,
   },
   {
     title: "Quran with Nature",
     icon: library,
     iconOutline: libraryOutline,
     url: "/subscriptions",
+    inProgress: true,
   },
 ];
 
@@ -75,12 +87,14 @@ const pages2 = [
     icon: library,
     iconOutline: libraryOutline,
     url: "/library",
+    inProgress: true,
   },
   {
     title: "DeeniTube",
     icon: library,
     iconOutline: libraryOutline,
     url: "/history",
+    inProgress: true,
   },
 ];
 
@@ -90,12 +104,14 @@ const pages3 = [
     icon: settingsOutline,
     iconOutline: settingsOutline,
     url: "/settings",
+    inProgress: true,
   },
   {
     title: "Library",
     icon: library,
     iconOutline: libraryOutline,
     url: "/library",
+    inProgress: true,
   },
 ];
 
@@ -148,7 +164,7 @@ const Nav = () => {
               target="_blank"
               rel="noreferrer"
               href="https://deeniinfotech.com/"
-              style={{color: `#2d898c`}}
+              style={{ color: `#2d898c` }}
             >
               Deeni Info Tech
             </a>
@@ -170,31 +186,48 @@ const MenuList = ({ pages, openModal }) => {
 
   return (
     <div className={styles.list}>
-      {pages.map((p, i) => (
-        // <IonRouterLink
-        //   routerLink={p.url}
-        //   routerDirection="none"
-        //   detail={false}
-        //   lines="none"
-        //   key={i}
-        // >
-        <div
-          key={i}
-          className={classNames(
-            styles.item,
-            p.url === path ? styles.active : ""
-          )}
-          onClick={openModal}
-        >
-          <IonIcon
-            icon={p.url === path ? p.icon : p.iconOutline}
-            slot="start"
-            className={styles.icon}
-          />
-          <IonLabel className={styles.label}>{p.title}</IonLabel>
-        </div>
-        // </IonRouterLink>
-      ))}
+      {pages.map((p, i) =>
+        p.inProgress ? (
+          <div
+            key={i}
+            className={classNames(
+              styles.item,
+              p.url === path ? styles.active : ""
+            )}
+            onClick={openModal}
+          >
+            <IonIcon
+              icon={p.url === path ? p.icon : p.iconOutline}
+              slot="start"
+              className={styles.icon}
+            />
+            <IonLabel className={styles.label}>{p.title}</IonLabel>
+          </div>
+        ) : (
+          <IonRouterLink
+            routerLink={p.url}
+            routerDirection="none"
+            detail={false}
+            lines="none"
+            key={i}
+          >
+            <div
+              key={i}
+              className={classNames(
+                styles.item,
+                p.url === path ? styles.active : ""
+              )}
+            >
+              <IonIcon
+                icon={p.url === path ? p.icon : p.iconOutline}
+                slot="start"
+                className={styles.icon}
+              />
+              <IonLabel className={styles.label}>{p.title}</IonLabel>
+            </div>
+          </IonRouterLink>
+        )
+      )}
     </div>
   );
 };

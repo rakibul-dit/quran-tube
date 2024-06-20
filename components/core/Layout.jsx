@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
     } else if (path.match("/search")) {
       setType("type3");
     }
-    console.log(path);
+    // console.log(path);
   }, [path]);
 
   // mobile header scroll effect
@@ -135,7 +135,11 @@ const Layout = ({ children }) => {
         )}
 
         <div
-          className={classNames(styles.container, isMini ? styles.mini : "")}
+          className={classNames(
+            styles.container,
+            isMini ? styles.mini : "",
+            path == "/learn-quran-virtuoso" ? styles.virtuoso : ""
+          )}
           ref={container}
         >
           <div className={styles.content}>

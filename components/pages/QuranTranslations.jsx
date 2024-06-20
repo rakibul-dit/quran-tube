@@ -1,4 +1,5 @@
 import styles from "./Home.module.css";
+import withChipbarStyles from "./QuranTranslations.module.css";
 import classNames from "classnames";
 import { UIStore, setPreviewContainer } from "../../store";
 import { youtube, constants, server } from "../../lib/config";
@@ -14,16 +15,10 @@ import VideoCard from "../cards/Video";
 import ChipBar from "../ui/ChipBar";
 import Loader from "../utils/Loader";
 import useOnScreen from "../../hooks/useOnScreen";
-import Previewer from "../utils/Previewer";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
 
-const getUrl = (pagination) => {
-  // let pageToken = "";
-  // if (previousPageData !== null && previousPageData.nextPageToken !== null) {
-  //   pageToken = `&pageToken=${previousPageData.nextPageToken}`;
-  // }
-
+const getUrl = (pagination, activeSubCat) => {
   let page = pagination.page ? pagination.page : 1;
   if (Object.keys(pagination).length !== 0) {
     if (pagination.page < pagination.pageCount) {
@@ -32,12 +27,15 @@ const getUrl = (pagination) => {
   }
 
   console.log("page: " + page);
-  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${constants.DEFAULT_PAGE_LIMIT}&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Arabic&filters[dataContentType][$eq]=Quran Translation&filters[dataContentType][$eq]=Quran Learning&filters[status][$eq]=Approved`;
 
-  // return `${youtube.url}/playlistItems?key=${youtube.key}&part=snippet&playlistId=${playlistId}&maxResults=${constants.DEFAULT_PAGE_LIMIT}${pageToken}`;
+  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${
+    constants.DEFAULT_PAGE_LIMIT
+  }&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Translation${
+    activeSubCat ? `&filters[localizationId][$eq]=${activeSubCat}` : ""
+  }&filters[status][$eq]=Approved`;
 };
 
-const Home = () => {
+const QuranTranslations = () => {
   const isMini = UIStore.useState((s) => s.isMiniNav);
 
   const ref = useRef();
@@ -49,9 +47,30 @@ const Home = () => {
     videos: [],
   });
 
-  useEffect(() => {
-    const url = getUrl(data.pagination);
+  const [locales, setLocales] = useState([]);
+  const [activeSubCat, setActiveSubCat] = useState();
 
+  const subCatClickHandler = (id) => {
+    console.log(id);
+    setActiveSubCat(id);
+  };
+
+  useEffect(() => {
+    const url = `https://dbe.alquranarabia.com/api/localizations?pagination[page]=1&pagination[pageSize]=100&sort[0]=name:asc&fields[0]=id&fields[1]=name`;
+
+    const fetchData = async () => {
+      const res = await fetch(url);
+      const locales = await res.json();
+      setLocales(locales.data);
+    };
+
+    fetchData().catch(console.error);
+  }, []);
+
+  // fetch video on first load
+  useEffect(() => {
+    const url = getUrl({}, activeSubCat);
+    console.log(url);
     const fetchData = async () => {
       const res = await getVideosDataByUrl(url);
       setData({
@@ -62,7 +81,7 @@ const Home = () => {
     };
 
     fetchData().catch(console.error);
-  }, []);
+  }, [activeSubCat]);
   console.log(data);
 
   useEffect(() => {
@@ -73,7 +92,7 @@ const Home = () => {
     ) {
       setIsloadingMore(true);
 
-      const url = getUrl(data.pagination);
+      const url = getUrl(data.pagination, activeSubCat);
 
       const fetchData = async () => {
         const res = await getVideosDataByUrl(url);
@@ -123,14 +142,13 @@ const Home = () => {
   return (
     <>
       <Meta
-        title=""
-        description="Quran.Tube Homepage"
+        title="Quran Translations"
+        description="Quran.Tube"
         url={server}
         image={`${server}/img/logo/default_share.png`}
         type="website"
       />
 
-      {/* <Previewer /> */}
       <PlayerModal
         open={modalOpen}
         closer={handleModalClose}
@@ -139,25 +157,27 @@ const Home = () => {
       />
 
       <div className={styles.wrapper}>
-        {/*<div*/}
-        {/*  className={classNames(*/}
-        {/*    styles.header,*/}
-        {/*    isMini ? styles.mini : "",*/}
-        {/*    "chipbar"*/}
-        {/*  )}*/}
-        {/*>*/}
-        {/*  <ChipBar />*/}
-        {/*</div>*/}
+        <div
+          className={classNames(
+            styles.header,
+            isMini ? styles.mini : "",
+            "chipbar"
+          )}
+        >
+          <ChipBar
+            locales={locales}
+            activeId={activeSubCat}
+            subCatClickHandler={subCatClickHandler}
+          />
+        </div>
 
-        <div className={styles.container}>
+        <div className={`${styles.container} ${withChipbarStyles.withChipbar}`}>
           <div className={styles.content} ref={containerRef}>
             {data.videos.map((video, index) => (
               <div className={styles.item} key={index}>
                 <VideoCard
                   handleClick={handleClick}
                   attributes={video.attributes}
-                  // statistics={data.videoStats}
-                  // channelThumbnails={data.channels}
                 />
               </div>
             ))}
@@ -172,4 +192,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default QuranTranslations;
