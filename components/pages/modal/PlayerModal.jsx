@@ -10,7 +10,7 @@ export default function PlayerModal({ open, closer, src, videoDetail }) {
   return (
     <Modal
       open={open}
-      onClose={closer}
+      // onClose={closer}
       className="player-modal"
       closeAfterTransition
       slots={{ backdrop: Backdrop }}

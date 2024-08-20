@@ -100,12 +100,15 @@ const VideoCard = ({ attributes, handleClick }) => {
             </div>
 
             <div className={styles.details}>
-              {/* <div className={styles.avatar} onClick={() => handleClick(id)}>
+              <div
+                className={styles.avatar}
+                onClick={() => handleClick(attributes.ytVideoId)}
+              >
                 <img
-                  src={channelThumbnails ? channelThumbnails[channelId] : ""} //
+                  src={attributes.sourceLogoUrl ? attributes.sourceLogoUrl : ""} //
                   alt=""
                 />
-              </div> */}
+              </div>
               <div className={styles.meta}>
                 <div className={styles.meta_top}>
                   <div
